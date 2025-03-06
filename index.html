@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>웹 페이지 예제</title>
+  <!-- Material Symbols Outlined 아이콘 링크 -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* 기본 레이아웃 */
+    html,
+    body {
+      font-family: 'Pretendard', sans-serif;
+      height: 100%;
+      margin: 0;
+      background-color: #161616;
+    }
+
+    /* 헤더 */
+    header {
+      font-family: 'Pretendard', sans-serif;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px;
+      background-color: #161616;
+      z-index: 1;
+    }
+
+    .header-left,
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 기본 버튼 스타일 */
+    button {
+      font-family: 'Pretendard', sans-serif;
+      height: 50px;
+      width: 50px;
+      border-radius: 10px;
+      padding: 0 10px;
+      box-sizing: border-box;
+      background-color: #16161600;
+      color: #888;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: visible;
+    }
+
+    button:hover {
+      background-color: #333333;
+    }
+
+    /* delete 버튼 active 스타일 */
+    #delete-btn.active,
+    #menu-delete-btn.active {
+      background-color: #333333;
+    }
+
+    /* tooltip */
+    .tooltip {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(0);
+      background-color: #333;
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 4px;
+      opacity: 0;
+      pointer-events: none;
+      font-size: 12px;
+      white-space: nowrap;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .tooltip::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 0 5px 5px 5px;
+      border-style: solid;
+      border-color: transparent transparent #333 transparent;
+    }
+
+    button:hover .tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(10px);
+    }
+
+    /* 메인 글 박스 */
+    .post {
+      font-family: 'Pretendard', sans-serif;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #222222;
+      width: 800px;
+      border-radius: 5px;
+      position: relative;
+      transition: filter 0.3s ease;
+      cursor: pointer;
+    }
+
+    .post:hover {
+      filter: brightness(1.1);
+    }
+
+    .post:first-child {
+      margin-top: 30px;
+    }
+
+    .post h2 {
+      color: #fff;
+      margin: 0;
+    }
+
+    .post p {
+      color: gray;
+    }
+
+    /* 제목과 수정일 영역 */
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .post-footer {
+      text-align: right;
+      font-size: 12px;
+      color: #ccc;
+      line-height: 1.7;
+    }
+
+    .post-footer div {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 개별 삭제하기 버튼 */
+    .post-delete-btn {
+      font-family: 'Pretendard', sans-serif;
+      position: absolute;
+      height: 30px;
+      width: 80px;
+      bottom: 20px;
+      right: 20px;
+      background-color: #fff;
+      border: none;
+      cursor: pointer;
+      color: #000;
+      white-space: nowrap;
+      transition: background-color 0.3s ease, color 0.3s ease, opacity 0.3s ease;
+    }
+
+    .post-delete-btn:hover {
+      background-color: #ff5555;
+      color: #fff;
+    }
+
+    /* 메뉴 편집 스타일 */
+    .menu-editor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100%;
+      background-color: #1f1f1f;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+      z-index: 2;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .menu-editor.open {
+      transform: translateX(0);
+    }
+
+    .menu-header {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .menu-category-label {
+      font-family: 'Pretendard', sans-serif;
+      padding-left: 10px;
+      font-weight: bold;
+      margin-top: 50px;
+      font-size: 15px;
+      color: white;
+    }
+
+
+    .menu-list,
+    .submenu {
+      list-style-type: none;
+      padding: 0;
+    }
+
+/* 메뉴 항목: flexbox 레이아웃과 hover 효과 */
+.menu-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; /* 서브메뉴가 자동으로 아래 줄에 배치됨 */
+  padding: 5px 10px;
+  background-color: #333;
+  margin: 5px 0;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item:hover {
+  background-color: #444;
+}
+
+/* 토글 전용 박스: 토글 버튼만을 위한 별도 컨테이너 */
+.menu-toggle-box {
+  display: flex;
+  align-items: center;
+  margin-right: 10px; /* 토글 박스와 나머지 텍스트 간 간격 */
+}
+
+/* 기존 토글 버튼은 이제 별도 스타일 없이 사용 가능 */
+/* .menu-toggle-btn { ... } */
+
+/* 메뉴 이름과 글 개수는 그대로 붙어있도록 inline-block 유지 */
+.menu-name,
+.menu-count {
+  font-size: 16px;
+  color: #fff;
+}
+
+/* 서브메뉴는 전체 행을 차지하여 다음 줄에 나타남 */
+.submenu {
+  flex-basis: 100%;
+  margin-top: 5px;
+  margin-left: 20px; /* 들여쓰기 */
+}
+
+
+
+    .drag-indicator {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #ccc;
+      display: none;
+    }
+
+    /* 메인 영역 */
+    main {
+      background-color: #161616;
+      display: flex;
+      justify-content: center;
+      transition: padding-left 0.3s ease;
+    }
+
+    section {
+      flex: 1;
+    }
+
+    /* 검색 영역 */
+    .search-container {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 50px;
+      background-color: #3A3F44;
+      border-radius: 30px;
+      padding: 0 10px;
+      overflow: hidden;
+      transition: width 0.5s ease;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .search-icon {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      text-align: center;
+      line-height: 50px;
+      font-size: 20px;
+      color: #fff;
+      pointer-events: none;
+      transition: color 0.3s ease, text-align 0.3s ease, padding-right 0.3s ease;
+    }
+
+    #search-input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 0 20px;
+      box-sizing: border-box;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .search-container:hover {
+      width: 500px;
+    }
+
+    .search-container:hover #search-input {
+      opacity: 1;
+    }
+
+    .search-container:hover .search-icon {
+      text-align: right;
+      padding-right: 20px;
+      color: #999;
+    }
+
+    .search-container:hover .search-icon:hover {
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-left">
+      <button id="menu-toggle">
+        <span class="material-symbols-outlined">dock_to_right</span>
+        <span class="tooltip">메뉴 편집</span>
+      </button>
+      <button id="write-btn">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="tooltip">글 작성</span>
+      </button>
+      <button id="delete-btn">
+        <span class="material-symbols-outlined">delete</span>
+        <span class="tooltip">글 삭제</span>
+      </button>
+    </div>
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="게시물 검색하기 / 전체보기" />
+      <span class="search-icon">🔍︎</span>
+    </div>
+    <div class="header-right">
+      <button id="login-btn">
+        <span class="material-symbols-outlined">login</span>
+        <span class="tooltip">로그인</span>
+      </button>
+    </div>
+  </header>
+  <div id="menu-editor" class="menu-editor">
+    <div class="menu-header">
+      <button id="menu-close">
+        <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+        <span class="tooltip">닫기</span>
+      </button>
+      <button id="add-category">
+        <span class="material-symbols-outlined">library_add</span>
+        <span class="tooltip">카테고리 추가</span>
+      </button>
+      <button id="menu-write-btn">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="tooltip">글 작성</span>
+      </button>
+      <button id="menu-delete-btn">
+        <span class="material-symbols-outlined">delete</span>
+        <span class="tooltip">글 삭제</span>
+      </button>
+    </div>
+    <div class="menu-category-label">카테고리</div>
+    <ul id="menu-list" class="menu-list"></ul>
+  </div>
+  <main>
+    <section>
+      <div id="post-list"></div>
+    </section>
+  </main>
+  <script>
+    // 전역 변수: delete 모드 플래그
+    let deleteMode = false;
+
+    // 현재 적용된 필터(검색어)를 반환하는 함수
+    function getCurrentFilter() {
+      const searchInput = document.getElementById('search-input');
+      const searchTerm = searchInput ? searchInput.value.trim() : '';
+      return { searchTerm: searchTerm };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const menuToggle = document.getElementById('menu-toggle');
+      const menuClose = document.getElementById('menu-close');
+      const menuEditor = document.getElementById('menu-editor');
+      const main = document.querySelector('main');
+
+      // 메뉴 편집 패널 토글
+      function toggleMenuEditor() {
+        menuEditor.classList.toggle('open');
+        if (menuEditor.classList.contains('open')) {
+          main.style.paddingLeft = '250px';
+          menuToggle.style.visibility = 'hidden';
+        } else {
+          main.style.paddingLeft = '0';
+          menuToggle.style.visibility = 'visible';
+        }
+      }
+
+      menuToggle.addEventListener('click', toggleMenuEditor);
+      menuClose.addEventListener('click', toggleMenuEditor);
+
+      // 헤더 및 메뉴 delete 버튼: 토글 기능 구현
+      const headerDeleteBtn = document.getElementById('delete-btn');
+      const menuDeleteBtn = document.getElementById('menu-delete-btn');
+      headerDeleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (deleteMode) {
+          exitDeleteMode();
+        } else {
+          enterDeleteMode();
+        }
+      });
+      menuDeleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (deleteMode) {
+          exitDeleteMode();
+        } else {
+          enterDeleteMode();
+        }
+      });
+
+      // 메뉴 편집 기능
+      const addCategoryButton = document.getElementById('add-category');
+      const menuList = document.getElementById('menu-list');
+      let menuId = 0;
+      let indicator = null;
+
+      // 메뉴 항목 생성 함수
+      function createMenuItem(name, id) {
+        const li = document.createElement('li');
+        li.className = 'menu-item';
+        li.draggable = true;
+        li.dataset.id = id;
+
+        // 토글 버튼: 초기 아이콘은 arrow_drop_down (하위 메뉴 보임)
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'menu-toggle-btn';
+        toggleBtn.innerHTML = `<span class="material-symbols-outlined">arrow_drop_down</span>`;
+
+        // 메뉴 이름 span
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'menu-name';
+        nameSpan.textContent = name;
+
+        // 글 개수 span (기본값 0, 필요에 따라 동적 업데이트)
+        const countSpan = document.createElement('span');
+        countSpan.className = 'menu-count';
+        countSpan.textContent = ' (0)';
+
+        // 하위 메뉴 (submenu)
+        const submenu = document.createElement('ul');
+        submenu.className = 'submenu';
+
+        // 토글 버튼 클릭 시 하위 메뉴 보이기/숨기기 및 아이콘 변경
+        toggleBtn.addEventListener('click', (e) => {
+          e.stopPropagation(); // 부모 이벤트 전파 차단
+          if (submenu.style.display === 'none' || submenu.style.display === '') {
+            submenu.style.display = 'block';
+            toggleBtn.innerHTML = `<span class="material-symbols-outlined">arrow_drop_down</span>`;
+          } else {
+            submenu.style.display = 'none';
+            toggleBtn.innerHTML = `<span class="material-symbols-outlined">arrow_drop_up</span>`;
+          }
+        });
+
+        // 메뉴 항목에 토글 버튼, 메뉴 이름, 글 개수, 하위 메뉴 순서로 추가
+        li.appendChild(toggleBtn);
+        li.appendChild(nameSpan);
+        li.appendChild(countSpan);
+        li.appendChild(submenu);
+
+        return li;
+      }
+
+
+
+      // 카테고리 추가 버튼 클릭 시
+      addCategoryButton.addEventListener('click', () => {
+        const menuName = prompt('카테고리 이름을 입력하세요:');
+        if (menuName) {
+          menuId++;
+          const menuItem = createMenuItem(menuName, menuId);
+          menuList.appendChild(menuItem);
+        }
+      });
+
+      // 드래그 시작 이벤트
+      menuList.addEventListener('dragstart', (e) => {
+        if (e.target.classList.contains('menu-item')) {
+          e.dataTransfer.setData('text/plain', e.target.dataset.id);
+        }
+      });
+
+      // 드래그 오버 이벤트
+      menuList.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const menuEditor = document.getElementById('menu-editor');
+        const menuEditorRect = menuEditor.getBoundingClientRect();
+        const targetElement = e.target.closest('.menu-item');
+
+        // 기존 인디케이터 감추기
+        if (indicator) {
+          indicator.style.display = 'none';
+        }
+
+        // targetElement가 있을 경우
+        if (targetElement) {
+          const rect = targetElement.getBoundingClientRect();
+          const mouseY = e.clientY;
+          const midY = rect.top + rect.height / 2;
+
+          if (mouseY >= midY) {
+            // 박스 아래쪽 절반: 인디케이터 표시
+            if (!indicator) {
+              indicator = document.createElement('div');
+              indicator.className = 'drag-indicator';
+              menuEditor.appendChild(indicator);  // 메뉴 영역에 추가
+            }
+            // 메뉴 영역 내부 좌표로 변환 (뷰포트 좌표 - 메뉴 영역 상단 좌표)
+            indicator.style.top = (rect.bottom - menuEditorRect.top + 1) + 'px';
+            indicator.style.display = 'block';
+          }
+        } else {
+          // targetElement가 없을 경우: 박스 사이에 인디케이터 표시
+          const items = menuList.querySelectorAll('.menu-item');
+          let inserted = false;
+          for (let item of items) {
+            const rect = item.getBoundingClientRect();
+            if (e.clientY < rect.top) {
+              if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'drag-indicator';
+                menuEditor.appendChild(indicator);  // 메뉴 영역에 추가
+              }
+              indicator.style.top = (rect.top - menuEditorRect.top - 1) + 'px';
+              indicator.style.display = 'block';
+              inserted = true;
+              break;
+            }
+          }
+          if (!inserted) {
+            const lastItem = items[items.length - 1];
+            if (lastItem) {
+              if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'drag-indicator';
+                menuEditor.appendChild(indicator);  // 메뉴 영역에 추가
+              }
+              indicator.style.top = (lastItem.getBoundingClientRect().bottom - menuEditorRect.top + 1) + 'px';
+              indicator.style.display = 'block';
+            }
+          }
+        }
+      });
+
+
+      // 드래그 리브 이벤트
+      menuList.addEventListener('dragleave', () => {
+        if (indicator) {
+          indicator.style.display = 'none';
+        }
+      });
+
+      // 드롭 이벤트
+      menuList.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const draggedId = e.dataTransfer.getData('text/plain');
+        const draggedElement = document.querySelector(`.menu-item[data-id="${draggedId}"]`);
+        const targetElement = e.target.closest('.menu-item');
+
+        if (indicator) {
+          indicator.style.display = 'none';
+        }
+
+        if (targetElement && targetElement !== draggedElement) {
+          const rect = targetElement.getBoundingClientRect();
+          const mouseY = e.clientY;
+          const midY = rect.top + rect.height / 2;
+
+          if (mouseY < midY) {
+            // 박스 위쪽 절반: 하위 메뉴로 삽입
+            const submenu = targetElement.querySelector('.submenu');
+            submenu.appendChild(draggedElement);
+          } else {
+            // 박스 아래쪽 절반: 박스 아래에 삽입
+            targetElement.parentNode.insertBefore(draggedElement, targetElement.nextSibling);
+          }
+        } else if (!targetElement) {
+          // 박스 사이에 드롭
+          const items = menuList.querySelectorAll('.menu-item');
+          let inserted = false;
+          for (let item of items) {
+            const rect = item.getBoundingClientRect();
+            if (e.clientY < rect.top) {
+              menuList.insertBefore(draggedElement, item);
+              inserted = true;
+              break;
+            }
+          }
+          if (!inserted) {
+            menuList.appendChild(draggedElement);
+          }
+        }
+      });
+
+      // 글 작성 버튼 기능
+      document.getElementById('menu-write-btn').addEventListener('click', () => {
+        localStorage.removeItem('editPostIndex');
+        window.location.href = 'write.html';
+      });
+    });
+
+    function enterDeleteMode() {
+      deleteMode = true;
+      document.getElementById('delete-btn').classList.add('active');
+      document.getElementById('menu-delete-btn').classList.add('active');
+      const filter = getCurrentFilter();
+      renderPosts(filter.searchTerm);
+      document.addEventListener('click', exitDeleteModeHandler);
+    }
+
+    function exitDeleteModeHandler(e) {
+      if (!e.target.closest('.post-delete-btn') &&
+        e.target.id !== 'delete-btn' &&
+        e.target.id !== 'menu-delete-btn') {
+        exitDeleteMode();
+      }
+    }
+
+    function exitDeleteMode() {
+      deleteMode = false;
+      document.getElementById('delete-btn').classList.remove('active');
+      document.getElementById('menu-delete-btn').classList.remove('active');
+      const filter = getCurrentFilter();
+      renderPosts(filter.searchTerm);
+      document.removeEventListener('click', exitDeleteModeHandler);
+    }
+
+    let posts = JSON.parse(localStorage.getItem('posts')) || [];
+
+    function savePosts() {
+      localStorage.setItem('posts', JSON.stringify(posts));
+    }
+
+    function renderPosts(searchTerm = null) {
+      const postList = document.getElementById('post-list');
+      postList.innerHTML = '';
+      let filteredPosts = posts;
+      if (searchTerm && searchTerm.trim() !== '') {
+        const term = searchTerm.toLowerCase();
+        filteredPosts = posts.filter(post =>
+          post.title.toLowerCase().includes(term) ||
+          post.content.toLowerCase().includes(term)
+        );
+      }
+      filteredPosts.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+
+      filteredPosts.forEach((post, index) => {
+        const div = document.createElement('div');
+        div.className = 'post';
+        div.innerHTML = `
+          <div class="post-header">
+            <h2>${post.title}</h2>
+            <div class="post-footer">
+              <div>최종 수정일</div>
+              <div>${new Date(post.lastModified).toLocaleString()}</div>
+            </div>
+          </div>
+          <p>${post.content.substring(0, 100)}...</p>
+        `;
+        div.addEventListener('click', (e) => {
+          if (deleteMode) {
+            exitDeleteMode();
+            e.stopPropagation();
+            return;
+          }
+          localStorage.setItem('currentPostIndex', index);
+          window.location.href = 'post.html';
+        });
+        if (deleteMode) {
+          const delBtn = document.createElement('button');
+          delBtn.textContent = '삭제하기';
+          delBtn.className = 'post-delete-btn';
+          delBtn.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            if (confirm(`"${post.title}" 글을 삭제하시겠습니까?`)) {
+              const postIndex = posts.indexOf(post);
+              if (postIndex !== -1) {
+                posts.splice(postIndex, 1);
+                savePosts();
+                renderPosts();
+              }
+            }
+          });
+          div.appendChild(delBtn);
+        }
+        postList.appendChild(div);
+      });
+    }
+
+    document.getElementById('write-btn').addEventListener('click', () => {
+      localStorage.removeItem('editPostIndex');
+      window.location.href = 'write.html';
+    });
+
+    document.getElementById('search-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const searchTerm = document.getElementById('search-input').value;
+        renderPosts(searchTerm);
+      }
+    });
+
+    renderPosts();
+  </script>
+</body>
+
+</html>
