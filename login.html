@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Page Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Material Symbols Outlined 아이콘 링크 -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #1b1b1b;
+      font-family: 'Pretendard', sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+    }
+
+    .login-container {
+      width: 330px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    /* UNOVA 버튼 스타일 수정 */
+    #home-btn {
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    #home-btn h1 {
+      color: #fff;
+      /* Pretendard 흰색 */
+      font-family: 'Pretendard', sans-serif;
+      margin-bottom: 30px;
+    }
+
+    .social-buttons {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .social-button {
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .social-button.x {
+      background-color: #333;
+      color: white;
+    }
+
+    .social-button.google {
+      background-color: #333;
+      color: white;
+    }
+
+    .social-button.apple {
+      background-color: #333;
+      color: white;
+    }
+
+    .login-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .login-form input {
+      padding: 0.75rem;
+      border: 1px solid #333;
+      border-radius: 15px;
+      background-color: #333;
+      color: #fff;
+    }
+
+    .login-form input:focus {
+      outline: none;
+      border-color: #777;
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin: 0.25rem 0;
+    }
+
+    .forgot-password a {
+      color: #999;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .forgot-password a:hover {
+      text-decoration: underline;
+    }
+
+    .login-button {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 15px;
+      background-color: #333;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .login-button:hover {
+      background-color: #0b5ed7;
+    }
+
+    .signup {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #888;
+    }
+
+    .signup a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .signup a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer 스타일 */
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      color: #fff;
+      padding: 1rem 0;
+      background-color: #1b1b1b;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <button id="home-btn">
+      <img src="logo.png" alt="Logo" width="60px" height="50px">
+      <h1>UNOVA</h1>
+    </button>
+    <div class="social-buttons">
+      <button class="social-button x">Continue with X</button>
+      <button class="social-button google">Continue with Google</button>
+      <button class="social-button apple">Continue with Apple</button>
+    </div>
+    <form class="login-form">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="Email" required />
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Password" required />
+      <div class="forgot-password">
+        <a href="#">Forgot your password?</a>
+      </div>
+      <button type="submit" class="login-button">Login</button>
+    </form>
+    <div class="signup">
+      Don't have an account? <a href="#">Sign up</a>
+    </div>
+  </div>
+  <footer>
+    Copyright 2024 .Unova .All right reserved
+  </footer>
+  <script>
+    document.getElementById('home-btn').addEventListener('click', () => {
+      console.log('Home button clicked');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+
+</html>

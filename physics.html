@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>특수 상대성 이론 스터디 사이트</title>
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    :root {
+      --background-color: #121212;
+      --text-color: #e0e0e0;
+      --sidebar-background: #1e1e1e;
+      --accent-color: #bb86fc;
+      --button-hover: #4c4c4c;
+      --note-background: #3c3c3c;
+      --note-header: #4c4c4c;
+    }
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      overflow: hidden;
+    }
+    .wrapper {
+      display: grid;
+      grid-template-columns: 150px 1fr 200px;
+      height: 100vh;
+      position: relative;
+    }
+    /* aside 스타일: 기본 배경 제거, 호버 시 배경색 나타남 */
+    .left-sidebar button,
+    .left-sidebar input {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--text-color);
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .left-sidebar button:hover,
+    .left-sidebar input:hover {
+      background-color: var(--button-hover);
+    }
+    /* 활성화된 도구는 항상 호버 색상 유지 */
+    .left-sidebar button.active-tool {
+      background-color: var(--button-hover);
+    }
+    /* 각 도구 컨테이너에 간격 추가 */
+    .tool-container {
+      margin-bottom: 10px;
+    }
+    /* 색상 팔레트 스타일 */
+    #pen-color-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 5px;
+    }
+    .color-swatch {
+      width: 24px;
+      height: 24px;
+      border: 1px solid #fff;
+      cursor: pointer;
+    }
+    /* 직접 색상 입력 */
+    #pen-color-input {
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+      background: transparent;
+      color: var(--text-color);
+      margin-top: 5px;
+    }
+    /* 메인 콘텐츠 */
+    .main-content {
+      position: relative;
+      overflow-y: auto;
+      padding: 30px;
+      background-color: #242424;
+    }
+    .main-content.drawing #drawing-canvas {
+      pointer-events: auto;
+    }
+    #drawing-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      background: transparent;
+    }
+    /* 우측 사이드바 (목차) */
+    .right-sidebar {
+      background-color: var(--sidebar-background);
+      padding: 20px;
+      overflow-y: auto;
+    }
+    #toc a {
+      display: block;
+      padding: 5px 10px;
+      color: var(--text-color);
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+    #toc a.h3 {
+      padding-left: 20px;
+    }
+    #toc a:hover {
+      background-color: #3c3c3c;
+    }
+    #toc a.active {
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+    /* 노트 스타일 */
+    .note {
+      position: absolute;
+      background-color: var(--note-background);
+      border: 1px solid #4c4c4c;
+      border-radius: 5px;
+      /* 어두운 그림자 추가 */
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+      /* 기본 resize 제거, 커스텀 핸들 사용 */
+      resize: none;
+      width: 300px;
+      height: 400px;
+      pointer-events: auto;
+    }
+    .note-header {
+      position: relative; /* 버튼 고정을 위해 */
+      background-color: var(--note-header);
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+    }
+    /* 드래그 핸들 영역: 헤더 왼쪽 빈 공간 */
+    .note-drag-handle {
+      width: 20px;
+      height: 100%;
+      cursor: move;
+      margin-right: 5px;
+    }
+    .note-title {
+      flex-grow: 1;
+      border: none;
+      background: transparent;
+      color: var(--text-color);
+      font-family: 'Pretendard', sans-serif;
+      font-size: 1em;
+      outline: none;
+    }
+    .note-header-buttons {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .note-header-buttons button {
+      background: transparent;
+      border: none;
+      color: var(--text-color);
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .note-content {
+      padding: 10px;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 1em;
+      outline: none;
+      border: none;
+      resize: none;
+      overflow-x: hidden; /* x축 스크롤바 제거 */
+      overflow-y: auto;
+      height: calc(100% - 40px);
+    }
+    /* 커스텀 스크롤바 for note-content */
+    .note-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .note-content::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.5);
+      border-radius: 3px;
+    }
+    /* 리사이즈 핸들 스타일 */
+    .resize-handle {
+      position: absolute;
+      background: transparent;
+    }
+    .resize-handle.left {
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      cursor: ew-resize;
+    }
+    .resize-handle.right {
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      cursor: ew-resize;
+    }
+    .resize-handle.top {
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      cursor: ns-resize;
+    }
+    .resize-handle.bottom {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 8px;
+      cursor: ns-resize;
+    }
+    .resize-handle.bottom-left {
+      left: 0;
+      bottom: 0;
+      width: 12px;
+      height: 12px;
+      cursor: nwse-resize;
+      z-index: 10;
+    }
+    .resize-handle.bottom-right {
+      right: 0;
+      bottom: 0;
+      width: 12px;
+      height: 12px;
+      cursor: nwse-resize;
+      z-index: 10;
+    }
+    /* 추가: 구글 Material Icons (구글 폰트) 스타일 변경 */
+    .material-icons {
+      color: #ccc;
+      font-size: 18px;
+    }
+  </style>
+  
+</head>
+<body>
+  <div class="wrapper">
+    <aside class="left-sidebar">
+      <!-- 노트 추가 버튼 -->
+      <div class="tool-container" id="note-container">
+        <button id="add-note"><span class="material-icons">note_add</span></button>
+      </div>
+      <!-- 펜 도구와 관련 컨트롤 -->
+      <div class="tool-container" id="pen-container">
+        <button id="pen"><span class="material-icons">border_color</span></button>
+        <div id="pen-controls" style="display: none;">
+          <div id="pen-color-palette">
+            <div class="color-swatch" style="background-color: black;" data-color="black"></div>
+            <div class="color-swatch" style="background-color: red;" data-color="red"></div>
+            <div class="color-swatch" style="background-color: blue;" data-color="blue"></div>
+            <div class="color-swatch" style="background-color: green;" data-color="green"></div>
+            <div class="color-swatch" style="background-color: purple;" data-color="purple"></div>
+            <div class="color-swatch" style="background-color: orange;" data-color="orange"></div>
+            <div class="color-swatch" style="background-color: yellow;" data-color="yellow"></div>
+            <div class="color-swatch" style="background-color: cyan;" data-color="cyan"></div>
+            <div class="color-swatch" style="background-color: magenta;" data-color="magenta"></div>
+          </div>
+          <input type="text" id="pen-color-input" placeholder="색상코드 (예: #ff0000)" />
+          <input type="range" id="pen-width" min="1" max="10" value="2">
+        </div>
+      </div>
+      <!-- 지우개 도구와 관련 컨트롤 -->
+      <div class="tool-container" id="eraser-container">
+        <button id="eraser"><span class="material-icons">radio_button_unchecked</span></button>
+        <div id="eraser-controls" style="display: none;">
+          <input type="range" id="eraser-width" min="5" max="50" value="10">
+        </div>
+      </div>
+      <!-- 전체 지우기 버튼 -->
+      <div class="tool-container" id="clear-container">
+        <button id="clear-canvas"><span class="material-icons">delete</span></button>
+      </div>
+      <!-- 저장하기 버튼 -->
+      <div class="tool-container" id="save-container">
+        <button id="save"><span class="material-icons">browse_gallery</span></button>
+      </div>
+    </aside>
+    <div class="main-content">
+      <main>
+        <h1>특수 상대성 이론</h1>
+        <!-- 본문 내용 생략 -->
+      </main>
+      <canvas id="drawing-canvas"></canvas>
+    </div>
+    <aside class="right-sidebar">
+      <nav id="toc"></nav>
+    </aside>
+    <div id="notes-container"></div>
+  </div>
+
+  <script>
+    // 캔버스 설정 및 기본 선 스타일
+    const canvas = document.getElementById('drawing-canvas');
+    const ctx = canvas.getContext('2d');
+    const mainContent = document.querySelector('.main-content');
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  
+    let currentTool = null;
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    // 초기 펜 색상을 "#ccc"로 설정
+    let penColor = '#ccc';
+    let penWidth = 2;
+    let eraserWidth = 10;
+  
+    // 캔버스 크기 업데이트
+    function resizeCanvas() {
+      const rect = mainContent.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+  
+    // 마우스 좌표 계산
+    function getMousePos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
+  
+    // 동적 커서 업데이트 (펜)
+    function updatePenCursor() {
+      const size = parseInt(penWidth);
+      const scale = 2;
+      const diameter = size * scale;
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = diameter + 4;
+      offCanvas.height = diameter + 4;
+      const offCtx = offCanvas.getContext('2d');
+      const center = (diameter + 4) / 2;
+      offCtx.beginPath();
+      offCtx.arc(center, center, diameter / 2, 0, 2 * Math.PI);
+      offCtx.fillStyle = penColor;  // 현재 선택된 색상 사용
+      offCtx.fill();
+      const dataURL = offCanvas.toDataURL();
+      canvas.style.cursor = `url(${dataURL}) ${center} ${center}, auto`;
+  
+      // 추가: 펜 버튼의 아이콘 색상도 현재 선택된 색상으로 업데이트
+      const penIcon = penBtn.querySelector('.material-icons');
+      if (penIcon) {
+        penIcon.style.color = penColor;
+      }
+    }
+  
+    // 동적 커서 업데이트 (지우개)
+    function updateEraserCursor() {
+      const size = parseInt(eraserWidth);
+      const scale = 1;
+      const diameter = size * scale;
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = diameter + 4;
+      offCanvas.height = diameter + 4;
+      const offCtx = offCanvas.getContext('2d');
+      const center = (diameter + 4) / 2;
+      offCtx.beginPath();
+      offCtx.arc(center, center, diameter / 2, 0, 2 * Math.PI);
+      offCtx.strokeStyle = 'white';
+      offCtx.lineWidth = 2;
+      offCtx.stroke();
+      const dataURL = offCanvas.toDataURL();
+      canvas.style.cursor = `url(${dataURL}) ${center} ${center}, auto`;
+    }
+  
+    // 목차 생성 (기존 코드 그대로)
+    function generateTOC() {
+      const toc = document.getElementById('toc');
+      const headings = document.querySelectorAll('main h2, main h3');
+      headings.forEach(heading => {
+        const link = document.createElement('a');
+        link.href = '#' + heading.id;
+        link.textContent = heading.textContent;
+        link.className = heading.tagName.toLowerCase();
+        toc.appendChild(link);
+      });
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            const link = toc.querySelector(`a[href="#${id}"]`);
+            toc.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+            link.classList.add('active');
+          }
+        });
+      }, { threshold: 0.5 });
+      headings.forEach(heading => observer.observe(heading));
+    }
+  
+    // 노트 닫기 시 커스텀 팝업을 띄우는 함수
+    function showSaveConfirm(note) {
+      const modalOverlay = document.createElement('div');
+      modalOverlay.style.position = 'fixed';
+      modalOverlay.style.top = '0';
+      modalOverlay.style.left = '0';
+      modalOverlay.style.width = '100%';
+      modalOverlay.style.height = '100%';
+      modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+      modalOverlay.style.display = 'flex';
+      modalOverlay.style.alignItems = 'center';
+      modalOverlay.style.justifyContent = 'center';
+      modalOverlay.style.zIndex = '10000';
+  
+      const modalBox = document.createElement('div');
+      modalBox.style.backgroundColor = '#fff';
+      modalBox.style.color = '#000';
+      modalBox.style.padding = '20px';
+      modalBox.style.borderRadius = '5px';
+      modalBox.style.textAlign = 'center';
+  
+      const message = document.createElement('p');
+      message.textContent = '저장하시겠습니까?';
+  
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = '저장';
+      saveBtn.style.margin = '5px';
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '닫기';
+      closeBtn.style.margin = '5px';
+  
+      modalBox.appendChild(message);
+      modalBox.appendChild(saveBtn);
+      modalBox.appendChild(closeBtn);
+      modalOverlay.appendChild(modalBox);
+      document.body.appendChild(modalOverlay);
+  
+      saveBtn.addEventListener('click', () => {
+        alert('노트 저장됨');
+        document.body.removeChild(modalOverlay);
+        note.remove();
+      });
+      closeBtn.addEventListener('click', () => {
+        document.body.removeChild(modalOverlay);
+        note.remove();
+      });
+    }
+  
+    // 노트 추가 및 드래그 – 수정된 노트 기능
+    document.getElementById('add-note').addEventListener('click', () => {
+      const note = document.createElement('div');
+      note.className = 'note';
+      note.style.top = '100px';
+      note.style.left = '200px';
+      note.style.width = '300px';
+      note.style.height = '400px';
+  
+      const header = document.createElement('div');
+      header.className = 'note-header';
+  
+      const dragHandle = document.createElement('div');
+      dragHandle.className = 'note-drag-handle';
+  
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleInput.className = 'note-title';
+      titleInput.placeholder = '제목 입력';
+      titleInput.addEventListener('mousedown', e => e.stopPropagation());
+      titleInput.addEventListener('click', e => e.stopPropagation());
+  
+      const headerButtons = document.createElement('div');
+      headerButtons.className = 'note-header-buttons';
+  
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'note-save-btn';
+      saveBtn.textContent = '💾';
+      saveBtn.addEventListener('click', () => {
+        alert('노트 저장됨');
+      });
+  
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'note-close-btn';
+      closeBtn.textContent = 'X';
+      closeBtn.addEventListener('click', () => {
+        showSaveConfirm(note);
+      });
+  
+      headerButtons.appendChild(saveBtn);
+      headerButtons.appendChild(closeBtn);
+  
+      header.appendChild(dragHandle);
+      header.appendChild(titleInput);
+      header.appendChild(headerButtons);
+  
+      const content = document.createElement('div');
+      content.className = 'note-content';
+      content.contentEditable = "true";
+      content.style.outline = "none";
+      content.style.height = "calc(100% - 40px)";
+  
+      note.appendChild(header);
+      note.appendChild(content);
+  
+      // 리사이즈 핸들 추가
+      const leftHandle = document.createElement('div');
+      leftHandle.className = 'resize-handle left';
+      const rightHandle = document.createElement('div');
+      rightHandle.className = 'resize-handle right';
+      const topHandle = document.createElement('div');
+      topHandle.className = 'resize-handle top';
+      const bottomHandle = document.createElement('div');
+      bottomHandle.className = 'resize-handle bottom';
+      const bottomLeftHandle = document.createElement('div');
+      bottomLeftHandle.className = 'resize-handle bottom-left';
+      const bottomRightHandle = document.createElement('div');
+      bottomRightHandle.className = 'resize-handle bottom-right';
+  
+      note.appendChild(leftHandle);
+      note.appendChild(rightHandle);
+      note.appendChild(topHandle);
+      note.appendChild(bottomHandle);
+      note.appendChild(bottomLeftHandle);
+      note.appendChild(bottomRightHandle);
+  
+      document.getElementById('notes-container').appendChild(note);
+      makeDraggable(note, dragHandle);
+  
+      // (리사이즈 핸들 이벤트 생략 - 기존 코드와 동일)
+      leftHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const startX = e.clientX;
+        const startLeft = note.offsetLeft;
+        const startWidth = note.offsetWidth;
+        function onMouseMove(e) {
+          const dx = e.clientX - startX;
+          const newWidth = startWidth - dx;
+          if(newWidth > 100) {
+            note.style.width = newWidth + 'px';
+            note.style.left = (startLeft + dx) + 'px';
+          }
+        }
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+      rightHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const startX = e.clientX;
+        const startWidth = note.offsetWidth;
+        function onMouseMove(e) {
+          const dx = e.clientX - startX;
+          const newWidth = startWidth + dx;
+          if(newWidth > 100) {
+            note.style.width = newWidth + 'px';
+          }
+        }
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+      topHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const startY = e.clientY;
+        const startTop = note.offsetTop;
+        const startHeight = note.offsetHeight;
+        function onMouseMove(e) {
+          const dy = e.clientY - startY;
+          const newHeight = startHeight - dy;
+          if(newHeight > 100) {
+            note.style.height = newHeight + 'px';
+            note.style.top = (startTop + dy) + 'px';
+          }
+        }
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+      bottomHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const startY = e.clientY;
+        const startHeight = note.offsetHeight;
+        function onMouseMove(e) {
+          const dy = e.clientY - startY;
+          const newHeight = startHeight + dy;
+          if(newHeight > 100) {
+            note.style.height = newHeight + 'px';
+          }
+        }
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+      bottomLeftHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startLeft = note.offsetLeft;
+        const startWidth = note.offsetWidth;
+        const startHeight = note.offsetHeight;
+        function onMouseMove(e) {
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          const newWidth = startWidth - dx;
+          const newHeight = startHeight + dy;
+          if(newWidth > 100) {
+            note.style.width = newWidth + 'px';
+            note.style.left = (startLeft + dx) + 'px';
+          }
+          if(newHeight > 100) {
+            note.style.height = newHeight + 'px';
+          }
+        }
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+      bottomRightHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = note.offsetWidth;
+        const startHeight = note.offsetHeight;
+        function onMouseMove(e) {
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          const newWidth = startWidth + dx;
+          const newHeight = startHeight + dy;
+          if(newWidth > 100) {
+            note.style.width = newWidth + 'px';
+          }
+          if(newHeight > 100) {
+            note.style.height = newHeight + 'px';
+          }
+        }
+        function onMouseUp() {
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+    });
+  
+    function makeDraggable(note, handle) {
+      let isDragging = false;
+      let offsetX, offsetY;
+      handle.addEventListener('mousedown', e => {
+        isDragging = true;
+        offsetX = e.clientX - note.offsetLeft;
+        offsetY = e.clientY - note.offsetTop;
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', e => {
+        if (isDragging) {
+          note.style.left = (e.clientX - offsetX) + 'px';
+          note.style.top = (e.clientY - offsetY) + 'px';
+        }
+      });
+      document.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+    }
+  
+    // 색상 팔레트 이벤트 처리
+    const palette = document.getElementById('pen-color-palette');
+    palette.addEventListener('click', (e) => {
+      if (e.target.classList.contains('color-swatch')) {
+        penColor = e.target.getAttribute('data-color');
+        if (currentTool === 'pen') updatePenCursor();
+      }
+    });
+  
+    // 직접 색상 입력 이벤트 처리
+    const penColorInput = document.getElementById('pen-color-input');
+    penColorInput.addEventListener('change', (e) => {
+      const value = e.target.value.trim();
+      if(value) {
+        penColor = value;
+        if (currentTool === 'pen') updatePenCursor();
+      }
+    });
+  
+    // 펜/지우개 도구 선택 및 커서 업데이트
+    const penBtn = document.getElementById('pen');
+    const eraserBtn = document.getElementById('eraser');
+  
+    penBtn.addEventListener('click', () => {
+      if (currentTool === 'pen') {
+        currentTool = null;
+        canvas.style.cursor = 'default';
+        penBtn.classList.remove('active-tool');
+      } else {
+        currentTool = 'pen';
+        updatePenCursor();
+        penBtn.classList.add('active-tool');
+        eraserBtn.classList.remove('active-tool');
+      }
+      mainContent.classList.toggle('drawing', currentTool === 'pen' || currentTool === 'eraser');
+    });
+  
+    eraserBtn.addEventListener('click', () => {
+      if (currentTool === 'eraser') {
+        currentTool = null;
+        canvas.style.cursor = 'default';
+        eraserBtn.classList.remove('active-tool');
+      } else {
+        currentTool = 'eraser';
+        updateEraserCursor();
+        eraserBtn.classList.add('active-tool');
+        penBtn.classList.remove('active-tool');
+      }
+      mainContent.classList.toggle('drawing', currentTool === 'pen' || currentTool === 'eraser');
+    });
+  
+    // 실시간 도구 속성 변화에 따른 커서 업데이트
+    document.getElementById('pen-width').addEventListener('input', (e) => {
+      penWidth = e.target.value;
+      if (currentTool === 'pen') updatePenCursor();
+    });
+    document.getElementById('eraser-width').addEventListener('input', (e) => {
+      eraserWidth = e.target.value;
+      if (currentTool === 'eraser') updateEraserCursor();
+    });
+    document.getElementById('clear-canvas').addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+  
+    // 부드러운 필기(및 지우개) – midpoint smoothing 방식
+    function drawSmoothStroke(e) {
+      const pos = getMousePos(e);
+      const midX = (lastX + pos.x) / 2;
+      const midY = (lastY + pos.y) / 2;
+      ctx.quadraticCurveTo(lastX, lastY, midX, midY);
+      ctx.stroke();
+      lastX = pos.x;
+      lastY = pos.y;
+    }
+  
+    canvas.addEventListener('mousedown', (e) => {
+      if (!currentTool) return;
+      isDrawing = true;
+      const pos = getMousePos(e);
+      lastX = pos.x;
+      lastY = pos.y;
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      if (currentTool === 'pen') {
+        ctx.lineWidth = penWidth;
+        ctx.strokeStyle = penColor;
+        ctx.globalCompositeOperation = 'source-over';
+      } else if (currentTool === 'eraser') {
+        ctx.lineWidth = eraserWidth;
+        ctx.globalCompositeOperation = 'destination-out';
+      }
+    });
+  
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      drawSmoothStroke(e);
+    });
+  
+    canvas.addEventListener('mouseup', (e) => {
+      if (!isDrawing) return;
+      drawSmoothStroke(e);
+      isDrawing = false;
+      ctx.closePath();
+    });
+  
+    canvas.addEventListener('mouseout', (e) => {
+      if (!isDrawing) return;
+      drawSmoothStroke(e);
+      isDrawing = false;
+      ctx.closePath();
+    });
+  
+    // 저장 기능 (임시)
+    document.getElementById('save').addEventListener('click', () => {
+      alert('저장이 완료되었습니다.');
+    });
+  
+    // 목차 초기화
+    generateTOC();
+  
+    // 펜 컨테이너에 마우스 오버 시 컨트롤 표시
+    const penContainer = document.getElementById('pen-container');
+    const penControls = document.getElementById('pen-controls');
+    penContainer.addEventListener('mouseenter', () => {
+      penControls.style.display = 'block';
+    });
+    penContainer.addEventListener('mouseleave', () => {
+      penControls.style.display = 'none';
+    });
+  
+    // 지우개 컨테이너에 마우스 오버 시 컨트롤 표시
+    const eraserContainer = document.getElementById('eraser-container');
+    const eraserControls = document.getElementById('eraser-controls');
+    eraserContainer.addEventListener('mouseenter', () => {
+      eraserControls.style.display = 'block';
+    });
+    eraserContainer.addEventListener('mouseleave', () => {
+      eraserControls.style.display = 'none';
+    });
+  </script>
+  
+</body>
+</html>

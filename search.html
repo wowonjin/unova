@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>검색 페이지</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <style>
+    /* 커리큘럼 스타일 */
+    .curriculum {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .curriculum h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .level-container {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .level-box {
+      color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      width: calc(33.333% - 10px);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      background-color: transparent;
+      pointer-events: none;
+    }
+    .level-box.colored {
+      background-color: #292a2d;
+      pointer-events: auto;
+    }
+    .level-box:hover {
+      background-color: #323438;
+    }
+    .level-box h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    .level-box ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 10px;
+      margin-bottom: 0;
+      flex-grow: 1;
+    }
+    .level-box li {
+      margin-bottom: 5px;
+      font-size: 1rem;
+      word-wrap: break-word;
+    }
+    .guidance {
+      margin-top: 40px;
+    }
+    .guidance h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .guidance p, .guidance ol {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    .guidance ol {
+      margin-left: 20px;
+    }
+    .guidance ol li {
+      margin-bottom: 10px;
+    }
+    
+    /* 모달 스타일 수정 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .modal.show {
+      display: flex;
+      opacity: 1;
+    }
+    .modal-content {
+      background-color: #292a2d;
+      color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      position: relative;
+    }
+    .modal-content h3 {
+      margin-top: 0;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+    .modal-content ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .modal-content li {
+      margin-bottom: 10px;
+      font-size: 1rem;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 8px;
+    }
+    /* 토글 관련 스타일 */
+    .modal-content .subject-header {
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-content .subject-header:hover {
+      color: #ddd;
+    }
+    .modal-content .chapters {
+      display: none;
+      margin-top: 5px;
+      padding-left: 15px;
+      font-size: 0.9rem; /* 토글 내부 텍스트 크기 축소 */
+    }
+    .modal-content .chapters li {
+      border: none; /* 토글 내 항목 사이 선 제거 */
+    }
+    .modal-content .chapters li:first-child {
+      margin-top: 5px; /* 토글 제목과 첫 항목 사이 간격 추가 */
+    }
+    .modal-content .toggle-btn {
+      font-size: 0.8rem; /* 삼각형 아이콘 크기 축소 */
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #aaa;
+      transition: color 0.2s;
+    }
+    .close-btn:hover {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <!-- 헤더 영역 -->
+  <header>
+    <div class="header-left">
+      <button id="menu-toggle">
+        <span class="material-symbols-outlined">dock_to_right</span>
+        <span class="tooltip">메뉴 보기</span>
+      </button>
+      <button id="write-btn">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="tooltip">글 작성</span>
+      </button>
+      <button id="delete-btn">
+        <span class="material-symbols-outlined">delete</span>
+        <span class="tooltip">글 삭제</span>
+      </button>
+    </div>
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="게시물 검색하기 / 전체보기" />
+      <span class="search-icon">🔍︎</span>
+    </div>
+    <div class="header-right">
+      <button id="home-btn">
+        <span class="material-symbols-outlined">home</span>
+        <span class="tooltip">홈</span>
+      </button>
+      <button id="login-btn">
+        <span class="material-symbols-outlined">login</span>
+        <span class="tooltip">로그인</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메인 영역: 커리큘럼 -->
+  <main>
+    <div class="curriculum">
+      <h1 id="main-title"></h1><br> 
+      <div class="level-container">
+        <!-- Beginner Level -->
+        <div class="level-box" data-level="beginner">
+          <h2 id="beginner-title"></h2>
+          <ul id="beginner-list"></ul>
+        </div>
+        <!-- Intermediate Level -->
+        <div class="level-box" data-level="intermediate">
+          <h2 id="intermediate-title"></h2>
+          <ul id="intermediate-list"></ul>
+        </div>
+        <!-- Advanced Level -->
+        <div class="level-box" data-level="advanced">
+          <h2 id="advanced-title"></h2>
+          <ul id="advanced-list"></ul>
+        </div>
+      </div>
+      <!-- 학습 안내 -->
+      <div class="guidance" id="guidance-section"></div>
+    </div>
+  </main>
+
+  <!-- 모달 창 -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">×</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    // 타이핑 효과 함수 (HTML 태그 포함, 글 추가 시 자동 스크롤)
+    function typeText(element, text, speed, callback) {
+      let i = 0;
+      element.innerHTML = '';
+      function typing() {
+        if (i < text.length) {
+          element.innerHTML += text.charAt(i);
+          i++;
+          window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+          setTimeout(typing, speed);
+        } else if (callback) {
+          callback();
+        }
+      }
+      typing();
+    }
+
+    // 리스트 항목 타이핑 함수
+    function typeListItems(listElement, items, speed, callback) {
+      let index = 0;
+      listElement.innerHTML = '';
+      function typeNextItem() {
+        if (index < items.length) {
+          const li = document.createElement('li');
+          listElement.appendChild(li);
+          typeText(li, items[index], speed, () => {
+            index++;
+            typeNextItem();
+          });
+        } else if (callback) {
+          callback();
+        }
+      }
+      typeNextItem();
+    }
+
+    // 박스 전체 타이핑 함수 (제목 + 리스트)
+    function typeBoxContent(titleElement, listElement, titleText, listItems, speed, callback) {
+      typeText(titleElement, titleText, speed, () => {
+        typeListItems(listElement, listItems, speed, callback);
+      });
+    }
+
+    // 학습 안내 영역에 타이핑 효과로 내용 표시하는 함수
+    function typeGuidanceContent(callback) {
+      const guidanceSection = document.getElementById('guidance-section');
+      guidanceSection.innerHTML = '';
+      
+      const h1 = document.createElement('h1');
+      h1.style.textAlign = "center";
+      guidanceSection.appendChild(h1);
+      typeText(h1, "커리큘럼 학습 안내", 10, () => {
+        const p1 = document.createElement('p');
+        guidanceSection.appendChild(p1);
+        typeText(p1, "이 커리큘럼은 로켓 제작에 필요한 기초 지식부터 전문가 수준의 기술까지 체계적으로 익힐 수 있도록 설계되었습니다. 실제 로켓을 제작하려면 아래의 학습 방법을 따라 주세요:", 10, () => {
+          const ol = document.createElement('ol');
+          guidanceSection.appendChild(ol);
+          const guidanceList = [
+            "순서대로 학습하기: Beginner Level부터 시작해 Intermediate, Advanced Level까지 단계적으로 진행하세요. 각 레벨은 이전 단계의 지식을 기반으로 하므로 순서를 지키는 것이 중요합니다.",
+            "필수 과목 우선 학습: 각 레벨에서 필수로 표시된 과목을 반드시 이수하세요. 선택 과목은 관심 분야에 따라 추가로 공부하면 더욱 깊이 있는 지식을 쌓을 수 있습니다.",
+            "실습과 프로젝트 병행: 이론만으로는 부족합니다. 간단한 로켓 모델 제작, 시뮬레이션 실습 등 실질적인 프로젝트를 통해 배운 내용을 적용해보세요.",
+            "최신 트렌드 파악: 로켓 과학은 빠르게 발전하는 분야입니다. 학술지, 논문, 온라인 강의를 통해 최신 연구와 기술 동향을 꾸준히 확인하세요.",
+            "커뮤니티 참여: 스터디 그룹이나 관련 커뮤니티에 가입해 다른 학습자와 협력하세요. 아이디어 교환과 문제 해결 과정을 통해 더 많은 통찰을 얻을 수 있습니다."
+          ];
+          let liIndex = 0;
+          function typeNextLi() {
+            if (liIndex < guidanceList.length) {
+              const li = document.createElement('li');
+              ol.appendChild(li);
+              typeText(li, guidanceList[liIndex], 10, () => {
+                liIndex++;
+                typeNextLi();
+              });
+            } else {
+              const p2 = document.createElement('p');
+              guidanceSection.appendChild(p2);
+              typeText(p2, "이 방법들을 꾸준히 실천하면 로켓 제작에 필요한 지식과 기술을 차근차근 습득할 수 있습니다. 각 레벨을 클릭해 과목을 확인하고, 자신만의 학습 계획을 세워보세요!", 10, callback);
+            }
+          }
+          typeNextLi();
+        });
+      });
+    }
+
+    // 예시 챕터 데이터
+    const chaptersData = {
+      "일반물리학": [
+        "1. 기초물리량",
+        "2. 등가속도 운동",
+        "3. 운동량과 충격량"
+      ],
+      "공학수학": [
+        "1. 미분법 기초",
+        "2. 적분법 기초",
+        "3. 행렬과 벡터",
+        "4. 복소수와 극좌표",
+        "5. 미분방정식 입문"
+      ],
+      "기초 미적분": [
+        "1. 함수와 극한",
+        "2. 미분의 기본 개념",
+        "3. 미분 법칙",
+        "4. 적분의 기본 개념",
+        "5. 적분 응용"
+      ],
+      "유체역학": [
+        "1. 유체의 성질",
+        "2. 베르누이 방정식",
+        "3. 연속 방정식",
+        "4. 점성 유체",
+        "5. 난류와 층류"
+      ],
+      "로켓 과학 입문": [
+        "1. 로켓의 역사",
+        "2. 기본 원리",
+        "3. 추진력과 질량",
+        "4. 연료의 종류",
+        "5. 비행 궤적"
+      ],
+      "화학 기초": [
+        "1. 원자 구조",
+        "2. 주기율표",
+        "3. 화학 결합",
+        "4. 산과 염기",
+        "5. 산화 환원"
+      ],
+      "전기전자 기초": [
+        "1. 전기 회로 기초",
+        "2. 저항과 전압",
+        "3. 키르히호프 법칙",
+        "4. 전자기 유도",
+        "5. 기초 반도체"
+      ],
+      "화학 추진 시스템": [
+        "1. 화학 반응의 기초",
+        "2. 연료 화학",
+        "3. 추진제의 성분",
+        "4. 연소 이론",
+        "5. 추진 효율"
+      ],
+      "공기역학": [
+        "1. 공기의 성질",
+        "2. 항력과 양력",
+        "3. 베르누이 원리",
+        "4. 경계층 이론",
+        "5. 항공기 설계 기초"
+      ],
+      "구조 설계": [
+        "1. 재료의 강도",
+        "2. 응력과 변형",
+        "3. 안전 계수",
+        "4. 구조 해석",
+        "5. 부재 설계"
+      ],
+      "공학 설계 과정": [
+        "1. 문제 정의",
+        "2. 아이디어 구상",
+        "3. 개념 설계",
+        "4. 상세 설계",
+        "5. 프로토타입 제작"
+      ],
+      "열역학": [
+        "1. 열역학 법칙",
+        "2. 상태 함수",
+        "3. 엔트로피",
+        "4. 열역학 사이클",
+        "5. 에너지 변환"
+      ],
+      "재료 과학": [
+        "1. 재료의 구조",
+        "2. 결정학",
+        "3. 합금과 복합재",
+        "4. 열처리",
+        "5. 재료 특성"
+      ],
+      "고급 로켓 과학": [
+        "1. 고급 추진 시스템",
+        "2. 다단 로켓 설계",
+        "3. 연소 최적화",
+        "4. 추진제 분석",
+        "5. 비행 제어"
+      ],
+      "궤도 역학": [
+        "1. 궤도 유형",
+        "2. 케플러의 법칙",
+        "3. 인공위성 운동",
+        "4. 궤도 변경",
+        "5. 중력장 모델링"
+      ],
+      "시스템 공학": [
+        "1. 시스템 개념",
+        "2. 모델링 및 시뮬레이션",
+        "3. 리스크 관리",
+        "4. 통합 설계",
+        "5. 성능 분석"
+      ],
+      "실습 기술": [
+        "1. 실험 기법",
+        "2. 데이터 분석",
+        "3. 장비 사용법",
+        "4. 실험 설계",
+        "5. 실습 평가"
+      ],
+      "항공우주 법규": [
+        "1. 국제 항공우주 법규",
+        "2. 비행 안전 규정",
+        "3. 환경 규제",
+        "4. 우주 조약",
+        "5. 법적 책임"
+      ],
+      "프로젝트 관리": [
+        "1. 프로젝트 계획",
+        "2. 자원 관리",
+        "3. 위험 관리",
+        "4. 일정 관리",
+        "5. 성과 평가"
+      ]
+    };
+
+    // 레벨별 상세 내용 (과목 정보)
+    const levelDetails = {
+      beginner: {
+        title: "1단계: 기초 단계",
+        subjects: [
+          { name: "일반물리학", required: true },
+          { name: "공학수학", required: true },
+          { name: "기초 미적분", required: true },
+          { name: "유체역학", required: true },
+          { name: "로켓 과학 입문", required: true },
+          { name: "화학 기초", required: false },
+          { name: "전기전자 기초", required: false }
+        ]
+      },
+      intermediate: {
+        title: "2단계: 중급 단계",
+        subjects: [
+          { name: "화학 추진 시스템", required: true },
+          { name: "공기역학", required: true },
+          { name: "구조 설계", required: true },
+          { name: "공학 설계 과정", required: true },
+          { name: "열역학", required: false },
+          { name: "재료 과학", required: false }
+        ]
+      },
+      advanced: {
+        title: "3단계: 전문가 단계",
+        subjects: [
+          { name: "고급 로켓 과학", required: true },
+          { name: "궤도 역학", required: true },
+          { name: "시스템 공학", required: true },
+          { name: "실습 기술", required: true },
+          { name: "항공우주 법규", required: false },
+          { name: "프로젝트 관리", required: false }
+        ]
+      }
+    };
+
+    // 레벨 박스 클릭 시 모달 열기 (토글 기능 포함)
+    document.querySelectorAll('.level-box').forEach(box => {
+      box.addEventListener('click', () => {
+        const level = box.getAttribute('data-level');
+        const details = levelDetails[level];
+        const modalContent = document.createElement('div');
+        const titleEl = document.createElement('h3');
+        titleEl.textContent = details.title;
+        modalContent.appendChild(titleEl);
+
+        const ul = document.createElement('ul');
+        details.subjects.forEach(subject => {
+          const li = document.createElement('li');
+          li.className = subject.required ? 'required' : 'optional';
+
+          // 과목 헤더 및 토글 버튼
+          const headerDiv = document.createElement('div');
+          headerDiv.className = 'subject-header';
+          headerDiv.innerHTML = subject.name + ' ' + (subject.required ? '(필수)' : '(선택)') + ' <span class="toggle-btn">▼</span>';
+          li.appendChild(headerDiv);
+
+          // 챕터 목록 (초기 상태는 숨김)
+          const chaptersUl = document.createElement('ul');
+          chaptersUl.className = 'chapters';
+          if(chaptersData[subject.name]) {
+            chaptersData[subject.name].forEach(chapter => {
+              const chapterLi = document.createElement('li');
+              chapterLi.textContent = chapter;
+              chaptersUl.appendChild(chapterLi);
+            });
+          } else {
+            const chapterLi = document.createElement('li');
+            chapterLi.textContent = "챕터 정보 없음";
+            chaptersUl.appendChild(chapterLi);
+          }
+          li.appendChild(chaptersUl);
+
+          // 토글 기능 구현
+          headerDiv.addEventListener('click', () => {
+            if(chaptersUl.style.display === 'none' || chaptersUl.style.display === '') {
+              chaptersUl.style.display = 'block';
+              headerDiv.querySelector('.toggle-btn').textContent = '▲';
+            } else {
+              chaptersUl.style.display = 'none';
+              headerDiv.querySelector('.toggle-btn').textContent = '▼';
+            }
+          });
+
+          ul.appendChild(li);
+        });
+        modalContent.appendChild(ul);
+
+        const modalBody = document.getElementById('modal-body');
+        modalBody.innerHTML = '';
+        modalBody.appendChild(modalContent);
+
+        document.getElementById('modal').classList.add('show');
+      });
+    });
+
+    // 모달 닫기 버튼
+    document.querySelector('.close-btn').addEventListener('click', () => {
+      document.getElementById('modal').classList.remove('show');
+    });
+
+    window.onload = () => {
+      const title = "로켓 제작을 위한 맞춤형 공학 커리큘럼";
+      const beginnerTitle = "1단계: 기초 단계";
+      const beginnerItems = [
+        "1. 일반물리학",
+        "2. 공학수학",
+        "3. 기초 미적분",
+        "4. 유체역학",
+        "5. 로켓 과학 입문"
+      ];
+      const intermediateTitle = "2단계: 중급 단계";
+      const intermediateItems = [
+        "1. 화학 추진 시스템",
+        "2. 공기역학",
+        "3. 구조 설계",
+        "4. 공학 설계 과정"
+      ];
+      const advancedTitle = "3단계: 전문가 단계";
+      const advancedItems = [
+        "1. 고급 로켓 과학",
+        "2. 궤도 역학",
+        "3. 시스템 공학",
+        "4. 실습 기술"
+      ];
+
+      const mainTitle = document.getElementById('main-title');
+      const beginnerTitleEl = document.getElementById('beginner-title');
+      const beginnerList = document.getElementById('beginner-list');
+      const intermediateTitleEl = document.getElementById('intermediate-title');
+      const intermediateList = document.getElementById('intermediate-list');
+      const advancedTitleEl = document.getElementById('advanced-title');
+      const advancedList = document.getElementById('advanced-list');
+      const levelBoxes = document.querySelectorAll('.level-box');
+
+      typeText(mainTitle, title, 50, () => {
+        typeBoxContent(beginnerTitleEl, beginnerList, beginnerTitle, beginnerItems, 10, () => {
+          levelBoxes[0].classList.add('colored');
+          typeBoxContent(intermediateTitleEl, intermediateList, intermediateTitle, intermediateItems, 10, () => {
+            levelBoxes[1].classList.add('colored');
+            typeBoxContent(advancedTitleEl, advancedList, advancedTitle, advancedItems, 10, () => {
+              levelBoxes[2].classList.add('colored');
+              typeGuidanceContent();
+            });
+          });
+        });
+      });
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>초기 페이지</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Material Symbols, Google Fonts, Pretendard -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  
+  <!-- 새 영역에 대한 CSS 추가 -->
+  <style>
+    /* dream-section 전체 영역 */
+    .dream-section {
+      padding: 40px 20px;
+      margin: 40px auto;
+      max-width: 800px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .dream-section h1 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+    /* 애니메이션용 span 스타일 */
+    #dream-title span {
+      opacity: 0; /* 처음에는 보이지 않음 */
+      transition: opacity 0.3s ease; /* 부드러운 전환 효과 */
+    }
+    .dream-input {
+      margin-bottom: 20px;
+    }
+    .dream-input input {
+      font-family: 'pretendard', sans-serif;
+      margin-top: 20px;
+      width: 60%;
+      max-width: 500px;
+      padding: 12px 30px;
+      font-size: 1rem;
+      border: 1px solid #292a2d;
+      background-color: #292a2d;
+      color: #ccc;
+      outline-color: black;
+      text-decoration: none;
+      border-radius: 40px;
+    }
+    
+    /* p 태그 색상 수정 */
+    .dream-section p {
+      font-size: 1.1rem;
+      color: #ccc;
+      margin-bottom: 30px;
+    }
+    .dream-offers {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .offer-box {
+      flex: 1;
+      min-width: 200px;
+      background: #292a2d;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      transition: all 0.3s ease-in-out;
+    }
+    .offer-box h2 {
+      margin-top: 0px;
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+    .offer-box p {
+      font-size: 1rem;
+      color: #999;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- 헤더 영역 -->
+  <header>
+    <div class="header-left">
+      <button id="menu-toggle">
+        <span class="material-symbols-outlined">dock_to_right</span>
+        <span class="tooltip">메뉴 보기</span>
+      </button>
+      <button id="write-btn">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="tooltip">글 작성</span>
+      </button>
+      <button id="delete-btn">
+        <span class="material-symbols-outlined">delete</span>
+        <span class="tooltip">글 삭제</span>
+      </button>
+    </div>
+    <div class="header-right">
+      <button id="home-btn">
+        <span class="material-symbols-outlined">home</span>
+        <span class="tooltip">홈</span>
+      </button>
+      <button id="login-btn">
+        <span class="material-symbols-outlined">login</span>
+        <span class="tooltip">로그인</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메뉴 편집 영역 -->
+  <div id="menu-editor" class="menu-editor">
+    <div class="menu-header">
+      <button id="menu-close">
+        <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+        <span class="tooltip">닫기</span>
+      </button>
+      <button id="add-category">
+        <span class="material-symbols-outlined">library_add</span>
+        <span class="tooltip">카테고리 추가</span>
+      </button>
+      <button id="write-btn">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="tooltip">글 작성</span>
+      </button>
+      <button id="menu-delete-btn">
+        <span class="material-symbols-outlined">delete</span>
+        <span class="tooltip">글 삭제</span>
+      </button>
+    </div>
+    <div class="menu-category-label">카테고리</div>
+    <ul id="menu-list" class="menu-list"></ul>
+  </div>
+
+  <!-- 메인 영역: 새 웹페이지 내용 삽입 -->
+  <main>
+    <section class="dream-section">
+      <h1 id="dream-title">
+        <span>W</span><span>h</span><span>a</span><span>t</span><span> </span>
+        <span>i</span><span>s</span><span> </span><span>y</span><span>o</span><span>u</span><span>r</span><span> </span>
+        <span>d</span><span>r</span><span>e</span><span>a</span><span>m</span><span>?</span>
+      </h1>
+      <div class="dream-input">
+        <!-- 여기를 form으로 감싸서 엔터 시 search.html로 이동하도록 변경 -->
+        <form action="search.html" method="GET">
+          <input type="text" name="q" value="I want to build a rocket" />
+        </form>
+      </div> 
+      <br><br>
+      <p>Hello, we offer you a variety of things :)</p>
+      <div class="dream-offers">
+        <div class="offer-box">
+          <h2>01</h2>
+          <p>Customized Curriculum</p>
+        </div>
+        <div class="offer-box">
+          <h2>02</h2>
+          <p>Necessary Knowledge</p>
+        </div>
+        <div class="offer-box">
+          <h2>03</h2>
+          <p>Period and Goals</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const titleSpans = document.querySelectorAll('#dream-title span');
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index < titleSpans.length) {
+          titleSpans[index].style.opacity = '1'; // 한 글자씩 보이게 설정
+          index++;
+        } else {
+          clearInterval(interval); // 모든 글자가 보이면 종료
+        }
+      }, 70); // 70ms 간격으로 글자 표시
+    });
+  </script>
+</body>
+</html>

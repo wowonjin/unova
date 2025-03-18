@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>글 상세 - UNOVA</title>
+  <!-- 공통 스타일 및 외부 폰트/아이콘 -->
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <style>
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <button id="menu-toggle">
+        <span class="material-symbols-outlined">dock_to_right</span>
+        <span class="tooltip">메뉴 보기</span>
+      </button>
+      <button id="write-btn">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="tooltip">글 작성</span>
+      </button>
+    </div>
+    <div class="header-right">
+      <button id="home-btn">
+        <span class="material-symbols-outlined">home</span>
+        <span class="tooltip">홈</span>
+      </button>
+      <button id="login-btn">
+        <span class="material-symbols-outlined">login</span>
+        <span class="tooltip">로그인</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메뉴 편집 영역 -->
+  <div id="menu-editor" class="menu-editor">
+    <div class="menu-header">
+      <button id="menu-close">
+        <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+        <span class="tooltip">닫기</span>
+      </button>
+      <button id="add-category">
+        <span class="material-symbols-outlined">library_add</span>
+        <span class="tooltip">카테고리 추가</span>
+      </button>
+      <button id="write-btn">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="tooltip">글 작성</span>
+      </button>
+      <button id="menu-delete-btn">
+        <span class="material-symbols-outlined">delete</span>
+        <span class="tooltip">글 삭제</span>
+      </button>
+    </div>
+    <div class="menu-category-label">카테고리</div>
+    <ul id="menu-list" class="menu-list"></ul>
+  </div>
+
+  <main>
+    <article id="post-detail"></article>
+    <button id="edit-btn">수정하기</button>
+  </main>
+  
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>글 작성/수정 - UNOVA</title>
+
+  <!-- Google Fonts & Pretendard -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+
+  <!-- Quill CSS -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
+  <!-- KaTeX CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+
+  <style>
+    /* 기본 설정 */
+    html, body {
+      font-family: 'Pretendard', sans-serif;
+      height: 100%;
+      margin: 0;
+      background-color: #161616;
+    }
+
+    /* 헤더 */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background-color: #161616;
+      position: relative;
+      z-index: 10;
+    }
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 버튼 스타일 */
+    button {
+      height: 50px;
+      width: 50px;
+      border-radius: 10px;
+      background-color: transparent;
+      color: #888;
+      border: none;
+      cursor: pointer;
+      position: relative;
+    }
+    button:hover {
+      background-color: #333333;
+    }
+    .tooltip {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(0);
+      background-color: #333;
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 4px;
+      opacity: 0;
+      font-size: 12px;
+      white-space: nowrap;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 10;
+    }
+    button:hover .tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(10px);
+    }
+
+    /* 사이드 메뉴 */
+    .menu-editor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 250px;
+      height: 100%;
+      background-color: #1f1f1f;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+      z-index: 9;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .menu-editor.open {
+      transform: translateX(0);
+    }
+    .menu-header {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .menu-category-label {
+      padding-left: 10px;
+      font-weight: bold;
+      margin-top: 5px;
+      margin-bottom: 0;
+      font-size: 13px;
+      color: white;
+    }
+    .menu-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .menu-list li {
+      padding: 10px;
+      cursor: pointer;
+    }
+    .menu-list li:hover {
+      background-color: #333;
+    }
+
+    /* 메인 영역 */
+    main {
+      background-color: #161616;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      padding-left: 0;
+      transition: padding-left 0.3s ease;
+    }
+    main.shifted {
+      padding-left: 250px;
+    }
+    .form-container {
+      width: 100%;
+      max-width: 900px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      color: #fff;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #fff;
+      font-weight: 600;
+    }
+    select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      background-color: #333;
+      color: #fff;
+      font-size: 16px;
+    }
+    select:focus {
+      border-color: #6b7280;
+      outline: none;
+    }
+
+    /* Quill 에디터 스타일 */
+    .ql-toolbar {
+      max-width: 900px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      border: none !important;
+      background: #292a2d;
+    }
+    .ql-toolbar .ql-stroke {
+      fill: none;
+      stroke: #aaa;
+    }
+    .ql-toolbar .ql-fill {
+      fill: #aaa;
+      stroke: none;
+    }
+    .ql-toolbar .ql-picker {
+      color: #aaa;
+    }
+    .ql-container {
+      font-family: 'Pretendard', sans-serif;
+      max-width: 900px;
+      min-height: 100px;
+      border: 2px solid #292a2d !important;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      padding: 4px;
+      box-sizing: border-box;
+    }
+    #titleEditor {
+      max-width: 900px;
+      min-height: 50px;
+      border: 2px solid #292a2d;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-family: 'Pretendard', sans-serif;
+      padding: 10px;
+    }
+    .error-message {
+      color: #ef4444;
+      font-size: 14px;
+      margin-top: -15px;
+      margin-bottom: 15px;
+      display: none;
+    }
+    .j2 {
+      font-size: 16px;
+      color: #444444;
+    }
+    
+    /* 발행하기 버튼 디자인 개선 */
+    .publish-btn {
+      background-color: #333;
+      width: 100px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      margin-top: 20px;
+    }
+    .publish-btn:hover {
+      background-color: #fff;
+      color: black;
+    }
+    .publish-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <!-- 헤더 영역 -->
+  <header>
+    <div class="header-left">
+      <button id="menu-toggle">
+        <span class="material-symbols-outlined">dock_to_right</span>
+        <span class="tooltip">메뉴 보기</span>
+      </button>
+      <button id="write-btn">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="tooltip">글 작성</span>
+      </button>
+    </div>
+    <div class="header-right">
+      <button id="home-btn" aria-label="홈">
+        <span class="material-symbols-outlined">home</span>
+        <span class="tooltip">홈</span>
+      </button>
+      <button id="login-btn" aria-label="로그인">
+        <span class="material-symbols-outlined">login</span>
+        <span class="tooltip">로그인</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 메뉴 편집 영역 -->
+  <div id="menu-editor" class="menu-editor">
+    <div class="menu-header">
+      <button id="menu-close">
+        <span class="material-symbols-outlined">keyboard_double_arrow_left</span>
+        <span class="tooltip">닫기</span>
+      </button>
+      <button id="add-category">
+        <span class="material-symbols-outlined">library_add</span>
+        <span class="tooltip">카테고리 추가</span>
+      </button>
+      <button id="write-btn">
+        <span class="material-symbols-outlined">edit_square</span>
+        <span class="tooltip">글 작성</span>
+      </button>
+      <button id="menu-delete-btn">
+        <span class="material-symbols-outlined">delete</span>
+        <span class="tooltip">글 삭제</span>
+      </button>
+    </div>
+    <div class="menu-category-label">카테고리</div>
+    <ul id="menu-list" class="menu-list"></ul>
+  </div>
+
+  <!-- 메인 영역 (글 작성 폼) -->
+  <main>
+    <div class="form-container">
+      <form id="write-form">
+        <label for="category">카테고리 선택</label>
+        <select id="category" name="category" required>
+          <option value="">카테고리 선택</option> 
+        </select><br><br>
+
+        <label for="titleEditor">제목 입력</label>
+        <div id="titleEditor"></div>
+        <div class="error-message" id="title-error">제목을 입력해주세요.</div><br>
+
+        <label for="editor">내용 입력</label>
+        <div id="toolbar-container" class="ql-toolbar">
+          <span class="ql-formats">
+            <select class="ql-font">
+              <option value="pretendard" selected>Pretendard</option>
+              <option value="monospace">Monospace</option>
+            </select>
+          </span>
+          <span class="j2">| </span>
+          <span class="ql-formats">
+            <select class="ql-size">
+              <option value="8px">8</option>
+              <option value="9px">9</option>
+              <option value="10px">10</option>
+              <option value="11px">11</option>
+              <option value="12px" selected>12</option>
+              <option value="14px">14</option>
+              <option value="16px">16</option>
+              <option value="18px">18</option>
+              <option value="20px">20</option>
+              <option value="22px">22</option>
+              <option value="24px">24</option>
+              <option value="28px">28</option>
+              <option value="30px">30</option>
+              <option value="36px">36</option>
+              <option value="50px">50</option>
+              <option value="72px">72</option>
+              <option value="96px">96</option>
+            </select>
+          </span>
+          <span class="j2">| </span>
+          <span class="ql-formats">
+            <button class="ql-bold"></button>
+            <button class="ql-italic"></button>
+            <button class="ql-underline"></button>
+            <button class="ql-strike"></button>
+          </span>
+          <span class="j2">| </span>
+          <span class="ql-formats">
+            <select class="ql-color"></select>
+            <select class="ql-background"></select>
+            <button class="ql-clean"></button>
+          </span>
+          <span class="j2">| </span>
+          <span class="ql-formats">
+            <button class="ql-script" value="sub"></button>
+            <button class="ql-script" value="super"></button>
+            <button class="ql-header" value="1"></button>
+            <button class="ql-header" value="2"></button>
+            <button class="ql-blockquote"></button>
+          </span>
+          <hr style="border: 0.1px solid #444444; margin: 5px 0;">
+          <span class="ql-formats">
+            <button class="ql-list" value="ordered"></button>
+            <button class="ql-list" value="bullet"></button>
+            <button class="ql-indent" value="-1"></button>
+            <button class="ql-indent" value="+1"></button>
+          </span>
+          <span class="j2">| </span>
+          <span class="ql-formats">
+            <button class="ql-align"></button>
+            <button class="ql-align" value="center"></button>
+            <button class="ql-align" value="right"></button>
+            <button class="ql-align" value="justify"></button>
+          </span>
+          <span class="j2">| </span>
+          <span class="ql-formats">
+            <button class="ql-link"></button>
+            <button class="ql-image"></button>
+            <button class="ql-video"></button>
+            <button class="ql-formula"></button>
+          </span>
+        </div>
+        <div id="editor" class="ql-container"></div>
+        <div class="error-message" id="content-error">내용을 입력해주세요.</div>
+
+        <button type="submit" class="publish-btn">발행하기</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- 외부 스크립트 -->
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Quill 에디터 크기 스타일 등록
+      const SizeStyle = Quill.import('attributors/style/size');
+      SizeStyle.whitelist = [
+        '8px','9px','10px','11px','12px','14px','16px','18px',
+        '20px','22px','24px','28px','30px','36px','50px','72px','96px'
+      ];
+      Quill.register(SizeStyle, true);
+
+      // 제목 Quill 에디터 초기화
+      const titleQuill = new Quill('#titleEditor', {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline'],
+            ['formula']
+          ]
+        }
+      });
+
+      // 내용 Quill 에디터 초기화
+      const quill = new Quill('#editor', {
+        modules: {
+          toolbar: '#toolbar-container'
+        },
+        theme: 'snow'
+      });
+
+      // 메뉴 토글 기능
+      document.getElementById('menu-toggle').addEventListener('click', function() {
+        document.getElementById('menu-editor').classList.add('open');
+        document.querySelector('main').classList.add('shifted');
+      });
+      document.getElementById('menu-close').addEventListener('click', function() {
+        document.getElementById('menu-editor').classList.remove('open');
+        document.querySelector('main').classList.remove('shifted');
+      });
+
+      // 카테고리 목록 로드 및 연동
+      let categories = JSON.parse(localStorage.getItem("categories")) || [];
+      const menuList = document.getElementById('menu-list');
+      const categorySelect = document.getElementById('category');
+      
+      // 기본 카테고리 설정 (없을 경우)
+      if (categories.length === 0) {
+        categories = ['카테고리1', '카테고리2', '카테고리3'];
+        localStorage.setItem("categories", JSON.stringify(categories));
+      }
+      
+      function loadCategories() {
+        // 메뉴 목록 업데이트
+        menuList.innerHTML = "";
+        categories.forEach(category => {
+          const li = document.createElement('li');
+          li.textContent = category;
+          li.addEventListener('click', () => {
+            categorySelect.value = category;
+          });
+          menuList.appendChild(li);
+        });
+        // 셀렉트 옵션 업데이트
+        categorySelect.innerHTML = '<option value="">카테고리 선택</option>';
+        categories.forEach(category => {
+          const option = document.createElement('option');
+          option.value = category;
+          option.textContent = category;
+          categorySelect.appendChild(option);
+        });
+      }
+      loadCategories();
+
+      // 카테고리 추가 기능
+      document.getElementById('add-category').addEventListener('click', function() {
+        const newCategory = prompt('새로운 카테고리 이름을 입력하세요:');
+        if (newCategory) {
+          categories.push(newCategory);
+          localStorage.setItem("categories", JSON.stringify(categories));
+          loadCategories();
+        }
+      });
+
+      // 홈 및 로그인 버튼 (예시)
+      document.getElementById('home-btn').addEventListener('click', function() {
+        window.location.href = 'main.html';
+      });
+      document.getElementById('login-btn').addEventListener('click', function() {
+        window.location.href = 'login.html';
+      });
+
+      // 폼 유효성 검사 및 제출 (발행하기)
+      document.getElementById('write-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const title = titleQuill.root.innerHTML.trim();
+        const content = quill.root.innerHTML.trim();
+        let isValid = true;
+      
+        if (!title || title === '<p><br></p>') {
+          document.getElementById('title-error').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('title-error').style.display = 'none';
+        }
+      
+        if (!content || content === '<p><br></p>') {
+          document.getElementById('content-error').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('content-error').style.display = 'none';
+        }
+      
+        if (isValid) {
+          let posts = JSON.parse(localStorage.getItem("posts")) || [];
+          posts.push({
+            id: Date.now(),
+            title: title,
+            content: content,
+            category: categorySelect.value,
+            lastModified: new Date().toISOString()
+          });
+          localStorage.setItem("posts", JSON.stringify(posts));
+          alert("글이 발행되었습니다!");
+          window.location.href = 'main.html';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

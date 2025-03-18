@@ -1,0 +1,487 @@
+/* 기본 스타일 */
+body {
+  font-family: "Pretendard", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #161616;
+  color: #ffffff;
+}
+
+/* 헤더 */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px;
+  background-color: #161616;
+  z-index: 1;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 추가 헤더 스타일 (main.css 추가) */
+.left, .center, .right {
+  flex: 1;
+}
+.left {
+  text-align: left;
+  transition: all 0.3s ease-in-out;
+}
+.left:hover {
+  text-shadow: 0px 0px 25px rgba(255, 255, 255, 0.9);
+}
+.center {
+  text-align: center;
+}
+.right {
+  text-align: right;
+}
+
+/* 기본 버튼 스타일 */
+button {
+  height: 50px;
+  width: 50px;
+  border-radius: 10px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  background-color: transparent;
+  color: #888;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
+}
+button:hover {
+  background-color: #333333;
+}
+
+/* delete 버튼 active 스타일 */
+#delete-btn.active,
+#sidebar-delete-btn.active,
+#menu-delete-btn.active {
+  background-color: #333333;
+}
+
+/* tooltip */
+.tooltip {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background-color: #333;
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.tooltip::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 5px 5px 5px;
+  border-style: solid;
+  border-color: transparent transparent #333 transparent;
+}
+button:hover .tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px);
+}
+
+/* 메인 글 박스 */
+.post {
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #222222;
+  width: 800px;
+  border-radius: 5px;
+  position: relative;
+  transition: filter 0.3s ease;
+  cursor: pointer;
+}
+.post:hover {
+  filter: brightness(1.1);
+}
+.post:first-child {
+  margin-top: 30px;
+}
+.post h2 {
+  margin: 0;
+  color: #fff;
+}
+.post p {
+  color: gray;
+}
+
+/* 제목과 수정일 영역 */
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.post-footer {
+  text-align: right;
+  font-size: 12px;
+  color: #ccc;
+  line-height: 1.7;
+}
+.post-footer div {
+  margin: 0;
+  padding: 0;
+}
+
+/* 개별 삭제하기 버튼 */
+.post-delete-btn {
+  position: absolute;
+  height: 30px;
+  width: 80px;
+  bottom: 20px;
+  right: 20px;
+  background-color: #fff;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  white-space: nowrap;
+  transition: background-color 0.3s ease, color 0.3s ease, opacity 0.3s ease;
+}
+.post-delete-btn:hover {
+  background-color: #ff5555;
+  color: #fff;
+}
+
+/* 사이드바 / 메뉴 편집 패널 */
+#sidebar,
+.menu-editor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background-color: #1f1f1f;
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+  z-index: 2;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.menu-editor.open,
+#sidebar.open {
+  transform: translateX(0);
+}
+.menu-header,
+.sidebar-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.menu-category-label,
+.sidebar-category-label {
+  padding-left: 10px;
+  font-weight: bold;
+  margin-top: 30px;
+  font-size: 13px;
+  color: white;
+}
+.menu-list,
+.submenu,
+#categoryList {
+  list-style-type: none;
+  padding: 0;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 5px 10px;
+  background-color: #333;
+  margin: 5px 0;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  cursor: move;
+}
+.menu-item:hover {
+  background-color: #444;
+}
+.menu-toggle-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-right: 10px;
+}
+.menu-name,
+.menu-count {
+  font-size: 16px;
+  color: #fff;
+}
+.submenu {
+  flex-basis: 100%;
+  margin-top: 5px;
+  margin-left: 20px;
+}
+.drag-indicator {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #ccc;
+  display: none;
+}
+
+/* 메인 영역 */
+main {
+  background-color: #161616;
+  display: flex;
+  justify-content: center;
+  transition: padding-left 0.3s ease;
+}
+section {
+  flex: 1;
+}
+
+/* 검색 영역 */
+.search-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 50px;
+  background-color: #3a3f44;
+  border-radius: 30px;
+  padding: 0 10px;
+  overflow: hidden;
+  transition: width 0.5s ease;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.search-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  line-height: 50px;
+  font-size: 20px;
+  color: #fff;
+  pointer-events: none;
+  transition: color 0.3s ease, text-align 0.3s ease, padding-right 0.3s ease;
+}
+#search-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 20px;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: #fff;
+  text-decoration: none;
+}
+.search-container:hover {
+  width: 500px;
+}
+.search-container:hover #search-input {
+  opacity: 1;
+}
+.search-container:hover .search-icon {
+  text-align: right;
+  padding-right: 20px;
+  color: #999;
+}
+.search-container:hover .search-icon:hover {
+  color: #fff;
+}
+
+/* 추가 레이아웃 (main.css 추가) */
+.container {
+  padding-left: 500px;
+  padding-right: 500px;
+}
+.container2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 게시글 목록 (main.css 추가) */
+#posts-list {
+  list-style: none;
+  padding: 0;
+}
+#posts-list li {
+  background: #292a2d;
+  margin-bottom: 10px;
+  padding: 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  color: white;
+  transition: color 0.5s ease;
+  z-index: 0;
+}
+#posts-list li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  z-index: -1;
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+#posts-list li:hover::before {
+  transform: translateX(0);
+}
+#posts-list li:hover {
+  color: #000;
+}
+
+/* 버튼 스타일 */
+.publish-btn {
+  background: #292a2d;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+.publish-btn:hover {
+  background: #ffffff;
+  color: #000;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(255, 255, 255, 0.5);
+}
+.publish-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 3px 6px rgba(255, 255, 255, 0.4);
+}
+
+/* 로딩 관련 */
+body.loading {
+  overflow: hidden;
+}
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #171717;
+  z-index: 999;
+  transform: translateX(0);
+  overflow: hidden;
+}
+#loading-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: white;
+  opacity: 1;
+}
+@keyframes slide-out {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(100%); }
+}
+@keyframes fade-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.animate-overlay {
+  animation: slide-out 1s ease-in-out forwards;
+}
+.animate-overlay #loading-text {
+  animation: fade-out 1s ease-in-out forwards;
+}
+
+/* 기타 버튼2 */
+.button2 {
+  height: 40px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  background-color: #222222;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+.button2:hover {
+  background-color: #555;
+}
+
+/* 팝업 */
+#popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  color: #000;
+  padding: 20px;
+  border: 1px solid #000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  display: none;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menu-editor .menu-item {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 5px 10px;
+  margin: 5px 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* 활성화된 카테고리: 배경색과 테두리 표시 */
+.menu-editor .menu-item.active {
+  background-color: #3a3f44;
+}
+
+/* 우클릭 팝업(컨텍스트 메뉴) 스타일 */
+.context-menu {
+  position: absolute;
+  background-color: #333;
+  border-radius: 5px;
+  padding: 5px;
+  z-index: 100;
+}
+.context-menu button {
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.context-menu button:hover {
+  background-color: #555;
+}
+
